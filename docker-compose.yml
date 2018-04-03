@@ -1,0 +1,18 @@
+version: '3'
+services:
+  doh:
+      build:
+        context: .
+        dockerfile: Dockerfile.doh
+      command: ./linux-x86_64/dnscrypt-proxy
+  pihole:
+    image: lplab/pihole:latest
+    ports:
+      - "53:53"
+      - "53:53/udp"
+      - "80:80"
+    command: bash -c "DNS1=$$(dig +short doh) DNS2=$$(dig +short doh) /sbin/entrypoint.sh"
+    environment:
+      # Quad9 servers
+       - DNS1=9.9.9.9
+       - DNS2=149.112.112.112
