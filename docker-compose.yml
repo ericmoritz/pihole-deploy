@@ -1,18 +1,36 @@
 version: '3'
 services:
-  doh:
-      build:
-        context: .
-        dockerfile: Dockerfile.doh
-      command: ./linux-x86_64/dnscrypt-proxy
+  haproxy:
+    build:
+      context: .
+      dockerfile: haproxy.Dockerfile
+    ports:
+      - "80:80"
   pihole:
-    image: lplab/pihole:latest
+    build:
+      context: .
+      dockerfile: pihole.Dockerfile
     ports:
       - "53:53"
       - "53:53/udp"
-      - "80:80"
-    command: bash -c "DNS1=$$(dig +short doh) DNS2=$$(dig +short doh) /sbin/entrypoint.sh"
+      - "67:67/udp"
+      - "8053:80"
     environment:
-      # Quad9 servers
-       - DNS1=9.9.9.9
-       - DNS2=149.112.112.112
+      ServerIP: 192.168.1.2
+      DNS1: "127.0.0.1#54"
+      DNS2: "127.0.0.1#54"
+      TAINER_HOME: /volume1/docker/pihole
+    volumes:
+      - "/volume1/docker/pihole/etc/pihole:/etc/pihole"
+      - "/volume1/docker/pihole/etc/dnsmasq.d/:/etc/dnsmasq.d/"
+  crashplan:
+    image: jlesage/crashplan-pro
+    environment:
+      USER_ID: 1024
+      CRASHPLAN_SRV_MAX_MEM: 2048M
+    volumes:
+      - "/volume1/docker/crashplan/config:/config:rw"
+      - "/volume1/docker/crashplan/storage:/storage:ro"
+      - "/volume1:/volume1:ro"
+    ports:
+      - "5800:5800"
