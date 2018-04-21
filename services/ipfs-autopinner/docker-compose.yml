@@ -1,0 +1,18 @@
+version: '3'
+services:
+  ipfs:
+    image: ipfs/go-ipfs:latest
+    env_file: ./ipfs.env
+    volumes:
+      - /tmp/data:/data/ipfs
+      - /tmp/export:/export
+    ports:
+      - "50080:8080"
+      - "55001:5001"
+      - "4001:4001"  
+  ipfs-2:
+    build: .
+    env_file: ./ipfs.env
+    volumes:
+      - /volume1/docker/ipfs/data:/data/ipfs
+      - /volume1/docker/ipfs/tmp/export:/export
